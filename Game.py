@@ -19,20 +19,24 @@ class Game:
         # self.running indicates if the game is running at all
         # setting it to False will close the game entirely
         self.running = True
+
+        self.spritesheets: dict[str, SpriteSheet] = {}
+        self.load_spritesheet("characters", (54, 44))
+        self.load_spritesheet("tilesheet", (16, 16), (1,1))
+
+        self.layout = []
+        self.player = None
+    
+    def load_spritesheet(self, name:str, *args):
         import sys
         from pathlib import Path
         dir = Path(sys.argv[0]).parent
-        self.spritesheets = {
-            "characters": SpriteSheet(Path(dir, "images/characters.png"), (54, 44)),
-            "tilesheet": SpriteSheet(Path(dir, "images/tilesheet.png"), (16,16), (1,1))
-        }
+        self.spritesheets[name] = SpriteSheet(Path(dir, f"images/{name}.png"), *args)
 
-        self.player = Entity(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
-        self.layout = self.load_tiles()
     
-    def load_tiles(self) -> list[Entity]:
+    def load_tiles(self, layout_raw) -> list[Entity]:
         layout = []
-        for y, row in enumerate(LAYOUT):
+        for y, row in enumerate(layout_raw):
             y *= TILE_H
             for x, char in enumerate(row):
                 x *= TILE_W
@@ -42,7 +46,10 @@ class Game:
                 layout.append(Entity(self.spritesheets["tilesheet"].get_sprite(sprite_pos), (x, y), (TILE_W,TILE_H)))
         return layout
     
+    # Start a new game
     def new(self):
+        self.layout = self.load_tiles(LAYOUT)
+        self.player = Entity(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
         self.run()
 
     def handle_events(self):
@@ -82,6 +89,7 @@ class Game:
 
         pg.display.flip()
     
+    # Show the start screen
     def start(self):
         pass
 
