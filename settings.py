@@ -41,7 +41,7 @@ LAYOUT = [
     "@@@@@@@@@@@[ ]@@@@@@@@@@@",
 ]
 
-LAYOUT_KEY = {
+LAYOUT_KEY: dict[str, tuple[float,float]|list[tuple[float,float]]] = {
     "#": (0,0),
     "@": [(0,0)]*8+[(1,0)]*4+[(2,0)],
     "*": (2,0),
