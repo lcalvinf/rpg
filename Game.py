@@ -1,6 +1,6 @@
 import pygame as pg
-from pathlib import Path
 import random
+import math
 
 from settings import *
 from sprites import SpriteSheet, Entity
@@ -67,17 +67,20 @@ class Game:
         player = self.player
         keys = pg.key.get_pressed()
         if keys[pg.K_UP]:
-            player.dir = 90
-            player.pos[1] -= 10
+            player.vel[1] = -SPEED
         elif keys[pg.K_DOWN]:
-            player.dir = 270 
-            player.pos[1] += 10
-        elif keys[pg.K_LEFT]:
-            player.dir = 180
-            player.pos[0] -= 10
+            player.vel[1] = SPEED
+        if keys[pg.K_LEFT]:
+            player.vel[0] = -SPEED
         elif keys[pg.K_RIGHT]:
-            player.dir = 0
-            player.pos[0] += 10
+            player.vel[0] = SPEED
+        if player.vel[0] != 0 and player.vel[1] != 0:
+            cur_speed = math.sqrt(player.vel[0]**2+player.vel[1]**2)
+            scale = SPEED/cur_speed
+            player.vel[0] *= scale 
+            player.vel[1] *= scale
+        
+        player.update()
 
     def draw(self):
         self.screen.fill(COLORS["background"])

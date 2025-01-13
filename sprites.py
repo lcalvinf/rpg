@@ -21,6 +21,7 @@ class SpriteSheet:
     def get_sprite_at(self, pos:tuple[float,float]):
         return self.get_image(pg.Rect(*pos,*self.tile_size))
 
+import math
 class Entity:
     def __init__(self, sprite:pg.Surface, pos: tuple[float,float], size: pg.Rect|None=None):
         if size is None:
@@ -30,6 +31,32 @@ class Entity:
             self.size = size
             self.sprite = pg.transform.scale(sprite, self.size)
         self.pos = pos
+        self.old_vel = [0,0]
+        self.vel = [0,0]
         self.dir = 0
+        self.target_dir = 0
+    def update(self):
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]
+        # 25 is arbitrary; we have to scale it down and 25 turned out to work well
+        speed = math.sqrt(self.vel[0]**2+self.vel[1]**2)/25
+        if speed > 0:
+            if self.vel[0] != self.old_vel[0] or self.vel[1] != self.old_vel[1]:
+                # flip sign of y because math expects up to be positive but the computer expects it to be negative
+                self.target_dir = math.atan2(-self.vel[1], self.vel[0])
+                # prevent it from rotating around the long way
+                while abs(self.target_dir-self.dir) > math.pi:
+                    if self.target_dir > self.dir:
+                        self.target_dir -= math.pi*2
+                    else:
+                        self.target_dir += math.pi*2
+            self.dir += (self.target_dir-self.dir)*speed
+        self.old_vel = self.vel
+        self.vel = [0,0]
     def render(self, screen):
-        screen.blit(pg.transform.rotate(self.sprite, self.dir), self.pos)
+        # Convert to degrees
+        dir = self.dir*180/math.pi
+        rotated = pg.transform.rotate(self.sprite, dir)
+        # Resize and reposition to effectively rotate around the center of the image
+        pos = rotated.get_rect(center = self.sprite.get_rect(topleft=self.pos).center)
+        screen.blit(rotated, pos)
