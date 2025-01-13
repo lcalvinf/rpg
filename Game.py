@@ -34,22 +34,29 @@ class Game:
         self.spritesheets[name] = SpriteSheet(Path(dir, f"images/{name}.png"), *args)
 
     
-    def load_tiles(self, layout_raw) -> list[Entity]:
+    def load_layout(self, layout_raw) -> list[Entity]:
         layout = []
         for y, row in enumerate(layout_raw):
             y *= TILE_H
             for x, char in enumerate(row):
                 x *= TILE_W
+                if LAYOUT_KEY["player"] == char:
+                    self.player.pos = [x,y]
+                    char = " "
                 sprite_pos = LAYOUT_KEY[char]
                 if type(sprite_pos) is list:
                     sprite_pos = random.choice(sprite_pos)
-                layout.append(Entity(self.spritesheets["tilesheet"].get_sprite(sprite_pos), (x, y), (TILE_W,TILE_H)))
+                rotation = 0
+                if len(sprite_pos) > 2:
+                    rotation = sprite_pos[2]
+                    sprite_pos = [sprite_pos[0], sprite_pos[1]]
+                layout.append(Entity(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H)))
         return layout
     
     # Start a new game
     def new(self):
-        self.layout = self.load_tiles(LAYOUT)
         self.player = Entity(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
+        self.layout = self.load_layout(LAYOUT)
         self.run()
 
     def handle_events(self):
