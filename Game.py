@@ -10,7 +10,8 @@ class Game:
         pg.init()
         pg.mixer.init()
 
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT), pg.RESIZABLE)
+        self.final_screen = pg.display.set_mode((WIDTH, HEIGHT), pg.RESIZABLE)
+        self.screen = pg.Surface((TILE_W*len(LAYOUT[0] ), TILE_H*len(LAYOUT)), self.final_screen.get_flags())
         self.clock = pg.time.Clock()
 
         # self.playing indicates if the update-display loop is running
@@ -26,6 +27,8 @@ class Game:
 
         self.layout = []
         self.player = None
+
+        self.camera = [WIDTH/2, HEIGHT/2]
     
     def load_spritesheet(self, name:str, *args):
         import sys
@@ -88,6 +91,7 @@ class Game:
             player.vel[1] *= scale
         
         player.update()
+        self.camera = [*player.pos]
 
     def draw(self):
         self.screen.fill(COLORS["background"])
@@ -96,6 +100,9 @@ class Game:
             tile.render(self.screen)
 
         self.player.render(self.screen)
+
+        self.final_screen.fill(COLORS["background"])
+        self.final_screen.blit(self.screen, (WIDTH/2-self.camera[0], HEIGHT/2-self.camera[1]))
 
         pg.display.flip()
     
