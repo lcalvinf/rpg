@@ -3,6 +3,7 @@ import random
 import math
 
 from settings import *
+from utils import *
 from sprites import SpriteSheet, Entity, Player
 
 class Game:
@@ -75,7 +76,12 @@ class Game:
 
     def update(self):
         self.player.update()
-        self.camera = [*self.player.pos]
+        if square_dist(self.camera, self.player.pos) <= CAMERA_LOCK_DIST**2:
+            self.camera = [*self.player.pos]
+        else:
+            dpos = sub_vectors(self.player.pos, self.camera)
+            dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE)
+            self.camera = add_vectors(self.camera, dpos)
 
     def draw(self):
         self.screen.fill(COLORS["background"])
@@ -86,7 +92,7 @@ class Game:
         self.player.render(self.screen)
 
         self.final_screen.fill(COLORS["background"])
-        self.final_screen.blit(self.screen, (WIDTH/2-self.camera[0], HEIGHT/2-self.camera[1]))
+        self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))
 
         pg.display.flip()
     
