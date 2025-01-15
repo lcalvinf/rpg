@@ -1,6 +1,8 @@
 import pygame as pg
 import pathlib
 
+from settings import *
+
 class SpriteSheet:
     def __init__(self, filename:pathlib.Path|str, tile_size:tuple[float,float], gap:tuple[float,float]=(0,0)):
         self.image = pg.image.load(filename).convert_alpha()
@@ -60,3 +62,24 @@ class Entity:
         # Resize and reposition to effectively rotate around the center of the image
         pos = rotated.get_rect(center = self.sprite.get_rect(topleft=self.pos).center)
         screen.blit(rotated, pos)
+
+class Player(Entity):
+    def __init__(self, *args):
+        super().__init__(*args)
+    def update(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_UP]:
+            self.vel[1] = -SPEED
+        elif keys[pg.K_DOWN]:
+            self.vel[1] = SPEED
+        if keys[pg.K_LEFT]:
+            self.vel[0] = -SPEED
+        elif keys[pg.K_RIGHT]:
+            self.vel[0] = SPEED
+        if self.vel[0] != 0 and self.vel[1] != 0:
+            cur_speed = math.sqrt(self.vel[0]**2+self.vel[1]**2)
+            scale = SPEED/cur_speed
+            self.vel[0] *= scale 
+            self.vel[1] *= scale
+        
+        super().update()

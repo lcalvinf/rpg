@@ -3,7 +3,7 @@ import random
 import math
 
 from settings import *
-from sprites import SpriteSheet, Entity
+from sprites import SpriteSheet, Entity, Player
 
 class Game:
     def __init__(self):
@@ -58,7 +58,7 @@ class Game:
     
     # Start a new game
     def new(self):
-        self.player = Entity(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
+        self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
         self.layout = self.load_layout(LAYOUT)
         self.run()
 
@@ -74,24 +74,8 @@ class Game:
                 HEIGHT = event.y
 
     def update(self):
-        player = self.player
-        keys = pg.key.get_pressed()
-        if keys[pg.K_UP]:
-            player.vel[1] = -SPEED
-        elif keys[pg.K_DOWN]:
-            player.vel[1] = SPEED
-        if keys[pg.K_LEFT]:
-            player.vel[0] = -SPEED
-        elif keys[pg.K_RIGHT]:
-            player.vel[0] = SPEED
-        if player.vel[0] != 0 and player.vel[1] != 0:
-            cur_speed = math.sqrt(player.vel[0]**2+player.vel[1]**2)
-            scale = SPEED/cur_speed
-            player.vel[0] *= scale 
-            player.vel[1] *= scale
-        
-        player.update()
-        self.camera = [*player.pos]
+        self.player.update()
+        self.camera = [*self.player.pos]
 
     def draw(self):
         self.screen.fill(COLORS["background"])
