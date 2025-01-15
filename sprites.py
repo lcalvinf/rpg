@@ -2,6 +2,7 @@ import pygame as pg
 import pathlib
 
 from settings import *
+from utils import *
 
 class SpriteSheet:
     def __init__(self, filename:pathlib.Path|str, tile_size:tuple[float,float], gap:tuple[float,float]=(0,0)):
@@ -38,12 +39,11 @@ class Entity:
         self.dir = 0
         self.target_dir = 0
     def update(self):
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
+        self.pos = add_vectors(self.pos, self.vel)
         # 25 is arbitrary; we have to scale it down and 25 turned out to work well
-        speed = math.sqrt(self.vel[0]**2+self.vel[1]**2)/25
+        speed = vector_size(self.vel)/25
         if speed > 0:
-            if self.vel[0] != self.old_vel[0] or self.vel[1] != self.old_vel[1]:
+            if not vectors_eq(self.vel, self.old_vel):
                 # flip sign of y because math expects up to be positive but the computer expects it to be negative
                 self.target_dir = math.atan2(-self.vel[1], self.vel[0])
                 # prevent it from rotating around the long way
@@ -77,9 +77,8 @@ class Player(Entity):
         elif keys[pg.K_RIGHT]:
             self.vel[0] = SPEED
         if self.vel[0] != 0 and self.vel[1] != 0:
-            cur_speed = math.sqrt(self.vel[0]**2+self.vel[1]**2)
+            cur_speed = vector_size(self.vel)
             scale = SPEED/cur_speed
-            self.vel[0] *= scale 
-            self.vel[1] *= scale
+            self.vel = scale_vector(self.vel, scale)
         
         super().update()
