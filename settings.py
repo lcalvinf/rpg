@@ -23,8 +23,8 @@ FPS = 60
 
 SPEED = 5
 
-CAMERA_LOCK_DIST = 1
-CAMERA_FOLLOW_RATE = 0.2
+CAMERA_LOCK_DIST = 50
+CAMERA_FOLLOW_RATE = 0.1
 
 LAYOUT = [
     "@@@@@@@@@@@@@@@@@@@@@@@[ ]@@@@@@@@@@@@@@@@@@@@@@@",

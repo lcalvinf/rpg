@@ -76,9 +76,7 @@ class Game:
 
     def update(self):
         self.player.update()
-        if square_dist(self.camera, self.player.pos) <= CAMERA_LOCK_DIST**2:
-            self.camera = [*self.player.pos]
-        else:
+        if square_dist(self.camera, self.player.pos) > CAMERA_LOCK_DIST**2:
             dpos = sub_vectors(self.player.pos, self.camera)
             dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE)
             self.camera = add_vectors(self.camera, dpos)
