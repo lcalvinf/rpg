@@ -4,7 +4,7 @@ import math
 
 from settings import *
 from utils import *
-from sprites import SpriteSheet, Entity, Player
+from sprites import SpriteSheet, Entity, Player, Zombie
 
 class Game:
     def __init__(self):
@@ -14,6 +14,9 @@ class Game:
         self.final_screen = pg.display.set_mode((WIDTH, HEIGHT), pg.RESIZABLE)
         self.screen = pg.Surface((TILE_W*len(LAYOUT[0] ), TILE_H*len(LAYOUT)), self.final_screen.get_flags())
         self.clock = pg.time.Clock()
+
+        self.font = pg.font.SysFont("sans-serif", 50)
+        self.smallfont = pg.font.SysFont("sans-serif", 30)
 
         # self.playing indicates if the update-display loop is running
         # setting it to False will end the current loop and transition to the next game screen (game over, start, etc.)
@@ -27,6 +30,7 @@ class Game:
         self.load_spritesheet("tilesheet", (16, 16), (1,1))
 
         self.layout = []
+        self.entities: list[Entity] = []
         self.player = None
 
         self.camera = [WIDTH/2, HEIGHT/2]
@@ -47,6 +51,9 @@ class Game:
                 if LAYOUT_KEY["player"] == char:
                     self.player.pos = [x,y]
                     char = " "
+                elif LAYOUT_KEY["zombie"] == char:
+                    self.entities.append(Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)),(x,y),(37,43)))
+                    char = " "
                 sprite_pos = LAYOUT_KEY[char]
                 if type(sprite_pos) is list:
                     sprite_pos = random.choice(sprite_pos)
@@ -60,6 +67,7 @@ class Game:
     # Start a new game
     def new(self):
         self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
+        self.entities = []
         self.layout = self.load_layout(LAYOUT)
         self.run()
 
@@ -75,7 +83,11 @@ class Game:
                 HEIGHT = event.y
 
     def update(self):
-        self.player.update()
+        self.player.update(self)
+
+        for entity in self.entities:
+            entity.update(self)
+
         if square_dist(self.camera, self.player.pos) > CAMERA_LOCK_DIST**2:
             dpos = sub_vectors(self.player.pos, self.camera)
             dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE)
@@ -86,6 +98,9 @@ class Game:
 
         for tile in self.layout:
             tile.render(self.screen)
+        
+        for entity in self.entities:
+            entity.render(self.screen)
 
         self.player.render(self.screen)
 
@@ -99,7 +114,20 @@ class Game:
         pass
 
     def game_over(self):
-        pass
+        self.playing = self.running
+        while self.playing:
+            for event in pg.event.get():
+                if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
+                    self.playing = False
+                    self.running = False
+                elif event.type == pg.KEYDOWN:
+                    self.playing = False
+            
+            self.final_screen.fill(COLORS["background"])
+            self.final_screen.blit(*draw_centered_text(self.font, "GAME OVER", BLACK, (WIDTH/2, HEIGHT/2-30)))
+            self.final_screen.blit(*draw_centered_text(self.smallfont, "Press any key to start over", BLACK, (WIDTH/2, HEIGHT/2+30)))
+            pg.display.flip()
+            self.clock.tick(FPS)
 
     def quit(self):
         self.playing = False
@@ -107,7 +135,7 @@ class Game:
         pg.quit()
 
     def run(self):
-        self.playing = True
+        self.playing = self.running
         while self.playing:
             self.handle_events()
             self.update()
@@ -116,5 +144,6 @@ class Game:
             # Delay
             self.clock.tick(FPS)
 
-        pg.quit()
-                
+def draw_centered_text(font, text, color, center_pos):
+    size = font.size(text)
+    return (font.render(text, True, color), sub_vectors(center_pos, scale_vector(size, 1/2)))

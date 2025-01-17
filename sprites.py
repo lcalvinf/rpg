@@ -38,7 +38,7 @@ class Entity:
         self.vel = [0,0]
         self.dir = 0
         self.target_dir = 0
-    def update(self):
+    def update(self, game):
         self.pos = add_vectors(self.pos, self.vel)
         # 25 is arbitrary; we have to scale it down and 25 turned out to work well
         speed = vector_size(self.vel)/25
@@ -63,10 +63,19 @@ class Entity:
         pos = rotated.get_rect(center = self.sprite.get_rect(topleft=self.pos).center)
         screen.blit(rotated, pos)
 
+class Zombie(Entity):
+    def __init__(self, *args):
+        super().__init__(*args)
+    def update(self, game):
+        self.vel = scale_vector(normalize_vector(sub_vectors(game.player.pos, self.pos)), ZOMBIE_SPEED)
+        if square_dist(self.pos, game.player.pos) <= min(add_vectors(self.size, game.player.size))/2:
+            game.playing = False
+        super().update(game)
+
 class Player(Entity):
     def __init__(self, *args):
         super().__init__(*args)
-    def update(self):
+    def update(self, game):
         keys = pg.key.get_pressed()
         if keys[pg.K_UP]:
             self.vel[1] = -SPEED
@@ -81,4 +90,4 @@ class Player(Entity):
             scale = SPEED/cur_speed
             self.vel = scale_vector(self.vel, scale)
         
-        super().update()
+        super().update(game)

@@ -11,6 +11,8 @@ def sub_vectors(a, b):
 
 def scale_vector(a: list[float], s: float):
     return [a[0]*s, a[1]*s]
+def normalize_vector(a):
+    return scale_vector(a, 1/vector_size(a))
 
 def square_dist(a: list[float], b: list[float]):
     return (a[0]-b[0])**2+(a[1]-b[1])**2
