@@ -25,8 +25,9 @@ class SpriteSheet:
         return self.get_image(pg.Rect(*pos,*self.tile_size))
 
 import math
-class Entity:
+class Entity(pg.sprite.Sprite):
     def __init__(self, sprite:pg.Surface, pos: tuple[float,float], size: pg.Rect|None=None):
+        super().__init__()
         if size is None:
             self.size = sprite.get_size()
             self.sprite = sprite
@@ -34,12 +35,18 @@ class Entity:
             self.size = size
             self.sprite = pg.transform.scale(sprite, self.size)
         self.pos = pos
+        self.image = self.sprite
+        # rect and radius are used by pg.sprite functions to know the size of the sprite
+        self.rect = pg.Rect(*self.pos, *self.size)
+        self.radius = min(*self.size)/2
         self.old_vel = [0,0]
         self.vel = [0,0]
         self.dir = 0
         self.target_dir = 0
     def update(self, game):
         self.pos = add_vectors(self.pos, self.vel)
+        # we change self.rect to render the sprite properly, so we have to reset it here
+        self.rect = pg.Rect(*self.pos, *self.size)
         # 25 is arbitrary; we have to scale it down and 25 turned out to work well
         speed = vector_size(self.vel)/25
         if speed > 0:
@@ -55,20 +62,22 @@ class Entity:
             self.dir += (self.target_dir-self.dir)*speed
         self.old_vel = self.vel
         self.vel = [0,0]
-    def render(self, screen):
+        self.render()
+    def render(self):
         # Convert to degrees
         dir = self.dir*180/math.pi
         rotated = pg.transform.rotate(self.sprite, dir)
         # Resize and reposition to effectively rotate around the center of the image
         pos = rotated.get_rect(center = self.sprite.get_rect(topleft=self.pos).center)
-        screen.blit(rotated, pos)
+        self.image = rotated
+        self.rect = pos
 
 class Zombie(Entity):
     def __init__(self, *args):
         super().__init__(*args)
     def update(self, game):
         self.vel = scale_vector(normalize_vector(sub_vectors(game.player.pos, self.pos)), ZOMBIE_SPEED)
-        if square_dist(self.pos, game.player.pos) <= min(add_vectors(self.size, game.player.size))/2:
+        if pg.sprite.collide_circle(self, game.player):
             game.playing = False
         super().update(game)
 

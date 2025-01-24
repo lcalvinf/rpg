@@ -29,8 +29,9 @@ class Game:
         self.load_spritesheet("characters", (54, 44))
         self.load_spritesheet("tilesheet", (16, 16), (1,1))
 
-        self.layout = []
-        self.entities: list[Entity] = []
+        self.layout = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
+        self.all_sprites = pg.sprite.LayeredUpdates()
         self.player = None
 
         self.camera = [WIDTH/2, HEIGHT/2]
@@ -42,8 +43,7 @@ class Game:
         self.spritesheets[name] = SpriteSheet(Path(dir, f"images/{name}.png"), *args)
 
     
-    def load_layout(self, layout_raw) -> list[Entity]:
-        layout = []
+    def load_layout(self, layout_raw):
         for y, row in enumerate(layout_raw):
             y *= TILE_H
             for x, char in enumerate(row):
@@ -52,7 +52,7 @@ class Game:
                     self.player.pos = [x,y]
                     char = " "
                 elif LAYOUT_KEY["zombie"] == char:
-                    self.entities.append(Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)),(x,y),(37,43)))
+                    Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)),(x,y),(37,43)).add(self.enemies, self.all_sprites)
                     char = " "
                 sprite_pos = LAYOUT_KEY[char]
                 if type(sprite_pos) is list:
@@ -61,14 +61,20 @@ class Game:
                 if len(sprite_pos) > 2:
                     rotation = sprite_pos[2]
                     sprite_pos = [sprite_pos[0], sprite_pos[1]]
-                layout.append(Entity(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H)))
-        return layout
+                Entity(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H)).add(self.all_sprites)
     
     # Start a new game
     def new(self):
+        self.all_sprites.empty()
+        self.enemies.empty()
+        self.layout.empty()
         self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
-        self.entities = []
-        self.layout = self.load_layout(LAYOUT)
+        self.player.add(self.all_sprites)
+        self.load_layout(LAYOUT)
+        for ent in self.enemies.sprites():
+            self.all_sprites.change_layer(ent, 1)
+        self.all_sprites.change_layer(self.player, 2)
+        print(self.all_sprites.layers())
         self.run()
 
     def handle_events(self):
@@ -84,9 +90,7 @@ class Game:
 
     def update(self):
         self.player.update(self)
-
-        for entity in self.entities:
-            entity.update(self)
+        self.enemies.update(self)
 
         if square_dist(self.camera, self.player.pos) > CAMERA_LOCK_DIST**2:
             dpos = sub_vectors(self.player.pos, self.camera)
@@ -96,13 +100,7 @@ class Game:
     def draw(self):
         self.screen.fill(COLORS["background"])
 
-        for tile in self.layout:
-            tile.render(self.screen)
-        
-        for entity in self.entities:
-            entity.render(self.screen)
-
-        self.player.render(self.screen)
+        self.all_sprites.draw(self.screen)
 
         self.final_screen.fill(COLORS["background"])
         self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))
