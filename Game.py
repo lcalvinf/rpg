@@ -31,6 +31,7 @@ class Game:
 
         self.layout = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
+        self.particles = pg.sprite.Group()
         self.all_sprites = pg.sprite.LayeredUpdates()
         self.player = None
 
@@ -67,6 +68,7 @@ class Game:
     def new(self):
         self.all_sprites.empty()
         self.enemies.empty()
+        self.particles.empty()
         self.layout.empty()
         self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
         self.player.add(self.all_sprites)
@@ -74,7 +76,6 @@ class Game:
         for ent in self.enemies.sprites():
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)
-        print(self.all_sprites.layers())
         self.run()
 
     def handle_events(self):
@@ -87,10 +88,14 @@ class Game:
             elif event.type == pg.WINDOWSIZECHANGED:
                 WIDTH = event.x
                 HEIGHT = event.y
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.player.fire_bullet(self)
 
     def update(self):
         self.player.update(self)
         self.enemies.update(self)
+        self.particles.update(self)
 
         if square_dist(self.camera, self.player.pos) > CAMERA_LOCK_DIST**2:
             dpos = sub_vectors(self.player.pos, self.camera)
@@ -141,6 +146,12 @@ class Game:
 
             # Delay
             self.clock.tick(FPS)
+    
+    def to_screen_coords(self,pos):
+        return sub_vectors(pos, self.camera)
+    def is_off_screen(self, pos):
+        screen_pos = self.to_screen_coords(pos)
+        return screen_pos[0] < -WIDTH/2 or screen_pos[0] > WIDTH/2 or screen_pos[1] < -HEIGHT/2 or screen_pos[1] > HEIGHT/2
 
 def draw_centered_text(font, text, color, center_pos):
     size = font.size(text)

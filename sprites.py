@@ -72,6 +72,19 @@ class Entity(pg.sprite.Sprite):
         self.image = rotated
         self.rect = pos
 
+class Bullet(Entity):
+    def __init__(self, vel, *args):
+        super().__init__(*args)
+        self.vel = vel
+        self.old_vel = vel
+    def update(self, game):
+        self.vel = self.old_vel
+        if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
+            self.kill()
+        if game.is_off_screen(self.pos):
+            self.kill()
+        super().update(game)
+
 class Zombie(Entity):
     def __init__(self, *args):
         super().__init__(*args)
@@ -100,3 +113,9 @@ class Player(Entity):
             self.vel = scale_vector(self.vel, scale)
         
         super().update(game)
+    def fire_bullet(self, game):
+        bullet = Bullet(rotate_vector([BULLET_SPEED,0], self.dir), pg.transform.rotate(game.spritesheets["tilesheet"].get_sprite([11,9]), -45), list(self.pos))
+        bullet.dir = self.dir
+        bullet.target_dir = self.dir
+        bullet.add(game.particles, game.all_sprites)
+        game.all_sprites.change_layer(bullet, 1)
