@@ -45,6 +45,11 @@ class Entity(pg.sprite.Sprite):
         self.target_dir = 0
     def update(self, game):
         self.pos = add_vectors(self.pos, self.vel)
+        for wall in pg.sprite.spritecollide(self, game.walls, False):
+            self.pos = sub_vectors(self.pos,self.vel)
+            self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
+            self.pos = add_vectors(self.pos, self.vel)
+            break
         # we change self.rect to render the sprite properly, so we have to reset it here
         self.rect = pg.Rect(*self.pos, *self.size)
         # 25 is arbitrary; we have to scale it down and 25 turned out to work well
@@ -72,13 +77,17 @@ class Entity(pg.sprite.Sprite):
         self.image = rotated
         self.rect = pos
 
+class Wall(Entity):
+    def __init__(self, *args):
+        super().__init__(*args)
+
 class Bullet(Entity):
     def __init__(self, vel, *args):
         super().__init__(*args)
         self.vel = vel
         self.old_vel = vel
     def update(self, game):
-        self.vel = self.old_vel
+        self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
             self.kill()
         if game.is_off_screen(self.pos):

@@ -12,7 +12,12 @@ def sub_vectors(a, b):
 def scale_vector(a: list[float], s: float):
     return [a[0]*s, a[1]*s]
 def normalize_vector(a):
-    return scale_vector(a, 1/vector_size(a))
+    size = vector_size(a)
+    if size == 0: 
+        return a
+    return scale_vector(a, 1/size)
+def set_mag(a, mag):
+    return scale_vector(normalize_vector(a),mag)
 
 def rotate_vector(v, angle):
     sin = math.sin(angle)

@@ -4,7 +4,7 @@ import math
 
 from settings import *
 from utils import *
-from sprites import SpriteSheet, Entity, Player, Zombie
+from sprites import SpriteSheet, Entity, Player, Zombie, Wall
 
 class Game:
     def __init__(self):
@@ -30,6 +30,7 @@ class Game:
         self.load_spritesheet("tilesheet", (16, 16), (1,1))
 
         self.layout = pg.sprite.Group()
+        self.walls = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
         self.particles = pg.sprite.Group()
         self.all_sprites = pg.sprite.LayeredUpdates()
@@ -56,19 +57,26 @@ class Game:
                     Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)),(x,y),(37,43)).add(self.enemies, self.all_sprites)
                     char = " "
                 sprite_pos = LAYOUT_KEY[char]
+                sprite_class = Entity
+                if char in LAYOUT_KEY["special"]:
+                    sprite_class = LAYOUT_KEY["special"][char]
                 if type(sprite_pos) is list:
                     sprite_pos = random.choice(sprite_pos)
                 rotation = 0
                 if len(sprite_pos) > 2:
                     rotation = sprite_pos[2]
                     sprite_pos = [sprite_pos[0], sprite_pos[1]]
-                Entity(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H)).add(self.all_sprites)
+                entity = sprite_class(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H))
+                entity.add(self.all_sprites)
+                if type(entity) is Wall:
+                    entity.add(self.walls)
     
     # Start a new game
     def new(self):
         self.all_sprites.empty()
         self.enemies.empty()
         self.particles.empty()
+        self.walls.empty()
         self.layout.empty()
         self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
         self.player.add(self.all_sprites)
