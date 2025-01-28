@@ -35,6 +35,7 @@ class Game:
         self.particles = pg.sprite.Group()
         self.all_sprites = pg.sprite.LayeredUpdates()
         self.player = None
+        self.score = 0
 
         self.camera = [WIDTH/2, HEIGHT/2]
     
@@ -98,6 +99,7 @@ class Game:
         for ent in self.enemies.sprites():
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)
+        self.score = 0
         self.run()
 
     def handle_events(self):
@@ -131,8 +133,13 @@ class Game:
 
         self.final_screen.fill(COLORS["background"])
         self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))
+        
+        self.draw_HUD()
 
         pg.display.flip()
+    def draw_HUD(self):
+        screen = self.final_screen
+        screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
     
     # Show the start screen
     def start(self):
@@ -149,6 +156,7 @@ class Game:
                     self.playing = False
             
             self.final_screen.fill(COLORS["background"])
+            self.final_screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
             self.final_screen.blit(*draw_centered_text(self.font, "GAME OVER", BLACK, (WIDTH/2, HEIGHT/2-30)))
             self.final_screen.blit(*draw_centered_text(self.smallfont, "Press any key to start over", BLACK, (WIDTH/2, HEIGHT/2+30)))
             pg.display.flip()

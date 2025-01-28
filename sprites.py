@@ -107,6 +107,7 @@ class Zombie(Entity):
     def kill(self):
         super().kill()
         if self.game:
+            self.game.score += 1
             self.game.spawn_zombie()
 
 class Player(Entity):
