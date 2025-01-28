@@ -75,16 +75,16 @@ class Game:
     def spawn_zombie(self):
         full_w = TILE_W*len(LAYOUT[0])
         full_h = TILE_H*len(LAYOUT)
-        minimum = 0
-        if len(self.enemies) < 2:
-            minimum = 1
-        for _ in range(random.randint(minimum,3)):
-            pos = [full_w/2, full_h/2]
-            while square_dist(pos, [full_w/2,full_h/2]) < (full_w/4)**2:
-                pos = [random.randint(0,full_w), random.randint(0,full_h)]
-            zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37,43))
-            zombie.add(self.enemies, self.all_sprites)
-            self.all_sprites.change_layer(zombie, 1)
+        # This should make it stabilize at around 4 Zombies
+        # and ensures there is always at least 1 Zombie
+        for _ in range(4):
+            if random.random() <= 1/(len(self.enemies)+1):
+                pos = [full_w/2, full_h/2]
+                while square_dist(pos, [full_w/2,full_h/2]) < (full_w/4)**2:
+                    pos = [random.randint(0,full_w), random.randint(0,full_h)]
+                zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37,43))
+                zombie.add(self.enemies, self.all_sprites)
+                self.all_sprites.change_layer(zombie, 1)
     
     # Start a new game
     def new(self):
@@ -99,6 +99,7 @@ class Game:
         for ent in self.enemies.sprites():
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)
+        self.spawn_zombie()
         self.score = 0
         self.run()
 
