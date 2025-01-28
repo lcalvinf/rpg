@@ -97,11 +97,17 @@ class Bullet(Entity):
 class Zombie(Entity):
     def __init__(self, *args):
         super().__init__(*args)
+        self.game = None
     def update(self, game):
         self.vel = scale_vector(normalize_vector(sub_vectors(game.player.pos, self.pos)), ZOMBIE_SPEED)
         if pg.sprite.collide_circle(self, game.player):
             game.playing = False
+        self.game = game
         super().update(game)
+    def kill(self):
+        super().kill()
+        if self.game:
+            self.game.spawn_zombie()
 
 class Player(Entity):
     def __init__(self, *args):
