@@ -75,12 +75,12 @@ class Game:
     def spawn_zombie(self):
         full_w = TILE_W*len(LAYOUT[0])
         full_h = TILE_H*len(LAYOUT)
-        # This should make it stabilize at around 4 Zombies
+        # This should make it stabilize at around 5 Zombies
         # and ensures there is always at least 1 Zombie
         for _ in range(4):
             if random.random() <= 1/(len(self.enemies)+1):
-                pos = [full_w/2, full_h/2]
-                while square_dist(pos, [full_w/2,full_h/2]) < (full_w/4)**2:
+                pos = [random.randint(0,full_w), random.randint(0,full_h)]
+                while not self.is_off_screen(pos):
                     pos = [random.randint(0,full_w), random.randint(0,full_h)]
                 zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37,43))
                 zombie.add(self.enemies, self.all_sprites)
@@ -122,15 +122,22 @@ class Game:
         self.enemies.update(self)
         self.particles.update(self)
 
-        if square_dist(self.camera, self.player.pos) > CAMERA_LOCK_DIST**2:
-            dpos = sub_vectors(self.player.pos, self.camera)
-            dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE)
+        target_pos = add_vectors(self.player.pos, scale_vector(self.player.old_vel, 20))
+        if square_dist(self.camera, target_pos) > CAMERA_LOCK_DIST**2:
+            if vector_size(self.player.old_vel) == 0:
+                dpos = sub_vectors(target_pos, self.camera)
+                dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE_STOPPED)
+            else:
+                dpos = sub_vectors(target_pos, self.camera)
+                dpos = set_mag(dpos, CAMERA_FOLLOW_RATE)
             self.camera = add_vectors(self.camera, dpos)
 
     def draw(self):
         self.screen.fill(COLORS["background"])
 
         self.all_sprites.draw(self.screen)
+    #    target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 100))
+    #    pg.draw.circle(self.screen, RED, target_pos, 10, 1)
 
         self.final_screen.fill(COLORS["background"])
         self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))
