@@ -1,5 +1,7 @@
 import pygame as pg
 
+DEBUG = False
+
 WHITE = pg.Color(255,255,255)
 BLACK = pg.Color(0,0,0)
 GRAY = pg.Color(128,128,128)

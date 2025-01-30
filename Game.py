@@ -138,8 +138,12 @@ class Game:
         self.screen.fill(COLORS["background"])
 
         self.all_sprites.draw(self.screen)
-    #    target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 100))
-    #    pg.draw.circle(self.screen, RED, target_pos, 10, 1)
+        if DEBUG:
+            target_pos = self.player.pos
+            target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 0))
+            pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST, 1)
+            pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST*1.5, 1)
+            pg.draw.circle(self.screen, BLUE, self.camera, 10, 1)
 
         self.final_screen.fill(COLORS["background"])
         self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))

@@ -75,6 +75,8 @@ class Entity(pg.sprite.Sprite):
         # Resize and reposition to effectively rotate around the center of the image
         pos = rotated.get_rect(center = self.sprite.get_rect(topleft=self.pos).center)
         self.image = rotated
+        if DEBUG:
+            pg.draw.rect(self.image, GREEN, pg.Rect(0,0,*self.image.get_size()), 1)
         self.rect = pos
 
 class Wall(Entity):
