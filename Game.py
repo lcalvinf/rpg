@@ -122,14 +122,16 @@ class Game:
         self.enemies.update(self)
         self.particles.update(self)
 
-        target_pos = add_vectors(self.player.pos, scale_vector(self.player.old_vel, 20))
-        if square_dist(self.camera, target_pos) > CAMERA_LOCK_DIST**2:
+        target_pos = self.player.pos
+        if square_dist(self.camera, target_pos) > CAMERA_LOCK_DIST**2 or vector_size(self.player.old_vel) == 0:
+            target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 0))
+            dpos = sub_vectors(target_pos, self.camera)
+            scale = CAMERA_FOLLOW_RATE
             if vector_size(self.player.old_vel) == 0:
-                dpos = sub_vectors(target_pos, self.camera)
-                dpos = scale_vector(dpos, CAMERA_FOLLOW_RATE_STOPPED)
-            else:
-                dpos = sub_vectors(target_pos, self.camera)
-                dpos = set_mag(dpos, CAMERA_FOLLOW_RATE)
+                scale = CAMERA_FOLLOW_RATE_STOPPED
+            elif square_dist(self.camera, target_pos) < (CAMERA_LOCK_DIST*1.5)**2:
+                scale /= 2
+            dpos = scale_vector(dpos, scale)
             self.camera = add_vectors(self.camera, dpos)
 
     def draw(self):
