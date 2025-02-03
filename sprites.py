@@ -67,8 +67,8 @@ class Entity(pg.sprite.Sprite):
             self.dir += (self.target_dir-self.dir)*speed
         self.old_vel = self.vel
         self.vel = [0,0]
-        self.render()
-    def render(self):
+        self.render(game)
+    def render(self, game):
         # Convert to degrees
         dir = self.dir*180/math.pi
         rotated = pg.transform.rotate(self.sprite, dir)
@@ -78,6 +78,7 @@ class Entity(pg.sprite.Sprite):
         if DEBUG:
             pg.draw.rect(self.image, GREEN, pg.Rect(0,0,*self.image.get_size()), 1)
         self.rect = pos
+        self.rect = game.camera.get_view(self)
 
 class Wall(Entity):
     def __init__(self, *args):
@@ -92,7 +93,7 @@ class Bullet(Entity):
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
             self.kill()
-        if game.is_off_screen(self.pos):
+        if game.camera.is_off_screen(self.pos):
             self.kill()
         super().update(game)
 

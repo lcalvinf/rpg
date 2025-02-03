@@ -62,6 +62,9 @@ LAYOUT = [
     "@@@@@@@@@@@@@@@@@@@@@@@[ ]@@@@@@@@@@@@@@@@@@@@@@@",
 ]
 
+FULL_WIDTH = TILE_W*len(LAYOUT[0])
+FULL_HEIGHT = TILE_H*len(LAYOUT)
+
 from sprites import Wall
 LAYOUT_KEY = {
     "#": (0,0),

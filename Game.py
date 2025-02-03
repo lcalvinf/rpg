@@ -5,14 +5,14 @@ import math
 from settings import *
 from utils import *
 from sprites import SpriteSheet, Entity, Player, Zombie, Wall
+from Camera import Camera
 
 class Game:
     def __init__(self):
         pg.init()
         pg.mixer.init()
 
-        self.final_screen = pg.display.set_mode((WIDTH, HEIGHT), pg.RESIZABLE)
-        self.screen = pg.Surface((TILE_W*len(LAYOUT[0] ), TILE_H*len(LAYOUT)), self.final_screen.get_flags())
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT), pg.RESIZABLE)
         self.clock = pg.time.Clock()
 
         self.font = pg.font.SysFont("sans-serif", 50)
@@ -37,7 +37,7 @@ class Game:
         self.player = None
         self.score = 0
 
-        self.camera = [WIDTH/2, HEIGHT/2]
+        self.camera = Camera(WIDTH,HEIGHT)
     
     def load_spritesheet(self, name:str, *args):
         import sys
@@ -68,7 +68,7 @@ class Game:
                     rotation = sprite_pos[2]
                     sprite_pos = [sprite_pos[0], sprite_pos[1]]
                 entity = sprite_class(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H))
-                entity.add(self.all_sprites)
+                entity.add(self.all_sprites, self.layout)
                 if type(entity) is Wall:
                     entity.add(self.walls)
     
@@ -80,11 +80,12 @@ class Game:
         for _ in range(4):
             if random.random() <= 1/(len(self.enemies)+1):
                 pos = [random.randint(0,full_w), random.randint(0,full_h)]
-                while not self.is_off_screen(pos):
+                while not self.camera.is_off_screen(pos):
                     pos = [random.randint(0,full_w), random.randint(0,full_h)]
                 zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37,43))
                 zombie.add(self.enemies, self.all_sprites)
                 self.all_sprites.change_layer(zombie, 1)
+                zombie.update(self)
     
     # Start a new game
     def new(self):
@@ -101,6 +102,7 @@ class Game:
         self.all_sprites.change_layer(self.player, 2)
         self.spawn_zombie()
         self.score = 0
+        self.camera = Camera(WIDTH,HEIGHT)
         self.run()
 
     def handle_events(self):
@@ -122,20 +124,13 @@ class Game:
         self.enemies.update(self)
         self.particles.update(self)
 
-        target_pos = self.player.pos
-        if square_dist(self.camera, target_pos) > CAMERA_LOCK_DIST**2 or vector_size(self.player.old_vel) == 0:
-            target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 0))
-            dpos = sub_vectors(target_pos, self.camera)
-            scale = CAMERA_FOLLOW_RATE
-            if vector_size(self.player.old_vel) == 0:
-                scale = CAMERA_FOLLOW_RATE_STOPPED
-            elif square_dist(self.camera, target_pos) < (CAMERA_LOCK_DIST*1.5)**2:
-                scale /= 2
-            dpos = scale_vector(dpos, scale)
-            self.camera = add_vectors(self.camera, dpos)
+        self.camera.update(self, self.player.pos)
 
     def draw(self):
         self.screen.fill(COLORS["background"])
+
+        for tile in self.layout:
+            tile.render(self)
 
         self.all_sprites.draw(self.screen)
         if DEBUG:
@@ -143,16 +138,13 @@ class Game:
             target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 0))
             pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST, 1)
             pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST*1.5, 1)
-            pg.draw.circle(self.screen, BLUE, self.camera, 10, 1)
-
-        self.final_screen.fill(COLORS["background"])
-        self.final_screen.blit(self.screen, sub_vectors(self.final_screen.get_rect().center, self.camera))
+            pg.draw.circle(self.screen, BLUE, self.camera.rect.center, 10, 1)
         
         self.draw_HUD()
 
         pg.display.flip()
     def draw_HUD(self):
-        screen = self.final_screen
+        screen = self.screen
         screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
     
     # Show the start screen
@@ -169,10 +161,10 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     self.playing = False
             
-            self.final_screen.fill(COLORS["background"])
-            self.final_screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
-            self.final_screen.blit(*draw_centered_text(self.font, "GAME OVER", BLACK, (WIDTH/2, HEIGHT/2-30)))
-            self.final_screen.blit(*draw_centered_text(self.smallfont, "Press any key to start over", BLACK, (WIDTH/2, HEIGHT/2+30)))
+            self.screen.fill(COLORS["background"])
+            self.screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
+            self.screen.blit(*draw_centered_text(self.font, "GAME OVER", BLACK, (WIDTH/2, HEIGHT/2-30)))
+            self.screen.blit(*draw_centered_text(self.smallfont, "Press any key to start over", BLACK, (WIDTH/2, HEIGHT/2+30)))
             pg.display.flip()
             self.clock.tick(FPS)
 
@@ -190,12 +182,6 @@ class Game:
 
             # Delay
             self.clock.tick(FPS)
-    
-    def to_screen_coords(self,pos):
-        return sub_vectors(pos, self.camera)
-    def is_off_screen(self, pos):
-        screen_pos = self.to_screen_coords(pos)
-        return screen_pos[0] < -WIDTH/2 or screen_pos[0] > WIDTH/2 or screen_pos[1] < -HEIGHT/2 or screen_pos[1] > HEIGHT/2
 
 def draw_centered_text(font, text, color, center_pos):
     size = font.size(text)
