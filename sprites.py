@@ -45,7 +45,7 @@ class Entity(pg.sprite.Sprite):
         self.target_dir = 0
     def update(self, game):
         self.pos = add_vectors(self.pos, self.vel)
-        for wall in pg.sprite.spritecollide(self, game.walls, False):
+        for wall in pg.sprite.spritecollide(self, game.walls, False, lambda a, b: pg.Rect(*a.pos,*a.size).colliderect(pg.Rect(*b.pos,*b.size))):
             self.pos = sub_vectors(self.pos,self.vel)
             self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
             self.pos = add_vectors(self.pos, self.vel)
@@ -93,7 +93,7 @@ class Bullet(Entity):
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
             self.kill()
-        if game.camera.is_off_screen(self.pos):
+        if game.camera.is_rect_off_screen(pg.Rect(*self.pos,*self.size)):
             self.kill()
         super().update(game)
 

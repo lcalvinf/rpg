@@ -25,3 +25,5 @@ class Camera:
     def is_off_screen(self, pos):
         screen_pos = self.to_screen_coords(pos)
         return screen_pos[0] < -WIDTH/2 or screen_pos[0] > WIDTH/2 or screen_pos[1] < -HEIGHT/2 or screen_pos[1] > HEIGHT/2
+    def is_rect_off_screen(self, rect:pg.Rect):
+        return self.is_off_screen(rect.topleft) and self.is_off_screen(rect.bottomright)

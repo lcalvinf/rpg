@@ -141,11 +141,15 @@ class Game:
 
         self.all_sprites.draw(self.screen)
         if DEBUG:
+            debug_screen = pg.Surface((WIDTH*2,HEIGHT*2), self.screen.get_flags())
+            debug_screen.blit(self.screen, self.camera.rect.topleft)
             target_pos = self.player.pos
             target_pos = add_vectors(self.player.pos, set_mag(self.player.old_vel, 0))
-            pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST, 1)
-            pg.draw.circle(self.screen, RED, target_pos, CAMERA_LOCK_DIST*1.5, 1)
-            pg.draw.circle(self.screen, BLUE, self.camera.rect.center, 10, 1)
+            pg.draw.circle(debug_screen, RED, target_pos, CAMERA_LOCK_DIST, 1)
+            pg.draw.circle(debug_screen, RED, target_pos, CAMERA_LOCK_DIST*1.5, 1)
+            pg.draw.circle(debug_screen, BLUE, self.camera.rect.center, 10, 1)
+            pg.draw.line(debug_screen,RED,self.player.pos, add_vectors(self.player.pos,rotate_vector((20,0), self.player.dir)))
+            self.screen.blit(debug_screen, scale_vector(self.camera.rect.topleft,-1))
         
         self.draw_HUD()
 
