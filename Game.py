@@ -47,8 +47,15 @@ class Game:
 
     
     def load_layout(self, layout_raw):
+        for x in range(len(LAYOUT[0])):
+            x *= TILE_W
+            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (x, -TILE_H), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (x,FULL_HEIGHT), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
         for y, row in enumerate(layout_raw):
             y *= TILE_H
+            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (-TILE_W, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (FULL_WIDTH, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+
             for x, char in enumerate(row):
                 x *= TILE_W
                 if LAYOUT_KEY["player"] == char:
