@@ -37,21 +37,24 @@ class Entity(pg.sprite.Sprite):
         self.pos = pos
         self.image = self.sprite
         # rect and radius are used by pg.sprite functions to know the size of the sprite
-        self.rect = pg.Rect(*self.pos, *self.size)
+        self.rect = self.world_rect 
         self.radius = min(*self.size)/2
         self.old_vel = [0,0]
         self.vel = [0,0]
         self.dir = 0
         self.target_dir = 0
+    @property
+    def world_rect(self):
+        return pg.Rect(*self.pos,*self.size)
     def update(self, game):
         self.pos = add_vectors(self.pos, self.vel)
-        for wall in pg.sprite.spritecollide(self, game.walls, False, lambda a, b: pg.Rect(*a.pos,*a.size).colliderect(pg.Rect(*b.pos,*b.size))):
+        for wall in pg.sprite.spritecollide(self, game.walls, False, lambda a, b: a.world_rect.colliderect(b.world_rect)):
             self.pos = sub_vectors(self.pos,self.vel)
             self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
             self.pos = add_vectors(self.pos, self.vel)
             break
         # we change self.rect to render the sprite properly, so we have to reset it here
-        self.rect = pg.Rect(*self.pos, *self.size)
+        self.rect = self.world_rect 
         # 25 is arbitrary; we have to scale it down and 25 turned out to work well
         speed = vector_size(self.vel)/25
         if speed > 0:
@@ -93,7 +96,7 @@ class Bullet(Entity):
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
             self.kill()
-        if game.camera.is_rect_off_screen(pg.Rect(*self.pos,*self.size)):
+        if game.camera.is_rect_off_screen(self.world_rect):
             self.kill()
         super().update(game)
 
