@@ -96,13 +96,26 @@ class Bullet(Entity):
         self.vel = vel
         self.old_vel = vel
         self.bounces = 0
+        self.kills = 0
     def update(self, game):
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
+            self.kills += 1
+            score = self.kills
             if self.bounces > 0:
-                game.score += 1
+                score += 1
                 game.spawn_text_particle(random.choice(CALLOUTS["bank"]), self.pos)
-            self.kill()
+
+            game.spawn_text_particle(f"+{score}", self.pos)
+
+            if self.kills > 1:
+                game.spawn_text_particle(random.choice(CALLOUTS["combo"]), self.pos)
+
+            game.score += score
+            self.vel = rotate_vector(self.vel, random.random()*math.pi/4-math.pi/2)
+            self.target_dir = math.atan2(-self.vel[1], self.vel[0])
+            self.dir = self.target_dir
+            self.old_vel = self.vel
         if game.camera.is_rect_off_screen(self.world_rect):
             self.kill()
         super().update(game)
@@ -149,7 +162,6 @@ class Zombie(Entity):
     def kill(self):
         super().kill()
         if self.game:
-            self.game.score += 1
             self.game.spawn_zombie()
 
 class Player(Entity):

@@ -18,7 +18,12 @@ COLORS = {
 CALLOUTS = {
     "bank": [
         "Bank Shot!",
-        "+2",
+        "Bounce!",
+    ],
+    "combo": [
+        "Combo!",
+        "Double kill!",
+        "Multishot!"
     ]
 }
 
