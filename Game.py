@@ -4,7 +4,7 @@ import math
 
 from settings import *
 from utils import *
-from sprites import SpriteSheet, Entity, Player, Zombie, Wall
+from sprites import SpriteSheet, Entity, Player, Zombie, Wall, TextParticle
 from Camera import Camera
 
 class Game:
@@ -93,6 +93,14 @@ class Game:
                 zombie.add(self.enemies, self.all_sprites)
                 self.all_sprites.change_layer(zombie, 1)
                 zombie.update(self)
+
+    def spawn_text_particle(self, text, pos=None):
+        if pos is None:
+            pos = self.player.pos
+        particle = TextParticle(self,text, pos)
+        particle.add(self.particles,self.all_sprites)
+        self.all_sprites.change_layer(particle,3)
+        particle.update(self)
     
     # Start a new game
     def new(self):

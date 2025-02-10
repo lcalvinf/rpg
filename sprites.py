@@ -52,6 +52,7 @@ class Entity(pg.sprite.Sprite):
             self.pos = sub_vectors(self.pos,self.vel)
             self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
             self.pos = add_vectors(self.pos, self.vel)
+            self.on_bounce(wall)
             break
         # we change self.rect to render the sprite properly, so we have to reset it here
         self.rect = self.world_rect 
@@ -71,6 +72,8 @@ class Entity(pg.sprite.Sprite):
         self.old_vel = self.vel
         self.vel = [0,0]
         self.render(game)
+    def on_bounce(self, wall):
+        pass
     def render(self, game):
         # Convert to degrees
         dir = self.dir*180/math.pi
@@ -92,13 +95,46 @@ class Bullet(Entity):
         super().__init__(*args)
         self.vel = vel
         self.old_vel = vel
+        self.bounces = 0
     def update(self, game):
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
+            if self.bounces > 0:
+                game.score += 1
+                game.spawn_text_particle(random.choice(CALLOUTS["bank"]), self.pos)
             self.kill()
         if game.camera.is_rect_off_screen(self.world_rect):
             self.kill()
         super().update(game)
+    def on_bounce(self, _):
+        self.bounces += 1
+
+import random
+class TextParticle(Entity):
+    def __init__(self, game, text, pos):
+        angle = random.random()*90-45
+        sprite = pg.transform.scale_by(pg.transform.rotate(game.font.render(text, True, BLACK),angle), random.random()*0.25+0.5)
+        super().__init__(sprite, sub_vectors(add_vectors(pos, (random.randint(-50,50), random.randint(-50,50))),game.camera.rect.topleft), sprite.get_size())
+        self.lifetime = random.random()*200+100
+        self.initial_lifetime = self.lifetime
+    def render(self, game):
+        super().render(game)
+        self.rect = self.rect.move(game.camera.rect.topleft)
+    def update(self, game):
+        self.lifetime -= game.clock.get_time()
+        if self.lifetime < 0:
+            self.kill()
+
+        super().update(game)
+
+        life = self.lifetime/self.initial_lifetime
+        if life > 0.5:
+            scale = (1-life)*2
+            self.rect = self.rect.scale_by(scale)
+            self.image = pg.transform.scale_by(self.image, scale)
+
+        alpha = 1-abs(life-0.5)*2
+        self.image.set_alpha(alpha*255)
 
 class Zombie(Entity):
     def __init__(self, *args):

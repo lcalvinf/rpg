@@ -15,6 +15,13 @@ COLORS = {
     "background": WHITE
 }
 
+CALLOUTS = {
+    "bank": [
+        "Bank Shot!",
+        "+2",
+    ]
+}
+
 WIDTH = 800
 HEIGHT = 512
 
