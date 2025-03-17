@@ -6,6 +6,8 @@ class Camera:
     def __init__(self, width, height):
         self.rect = pg.Rect(0,0,width,height)
     def update(self, game, target_pos):
+        FULL_WIDTH = TILEMAP.full_width
+        FULL_HEIGHT = TILEMAP.full_height
         if square_dist(self.rect.center, target_pos) > CAMERA_LOCK_DIST**2 or vector_size(game.player.old_vel) == 0:
             target_pos = add_vectors(game.player.pos, set_mag(game.player.old_vel, 0))
             dpos = sub_vectors(target_pos, self.rect.center)

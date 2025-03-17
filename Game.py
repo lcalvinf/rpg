@@ -46,50 +46,38 @@ class Game:
         self.spritesheets[name] = SpriteSheet(Path(dir, f"images/{name}.png"), *args)
 
     
-    def load_layout(self, layout_raw):
-        for x in range(len(LAYOUT[0])):
-            x *= TILE_W
-            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (x, -TILE_H), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (x,FULL_HEIGHT), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-        for y, row in enumerate(layout_raw):
-            y *= TILE_H
-            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (-TILE_W, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-            Wall(self.spritesheets["tilesheet"].get_sprite(LAYOUT_KEY["H"]), (FULL_WIDTH, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+    def load_layout(self):
+        TILEMAP.load()
+        FULL_WIDTH = TILEMAP.full_width
+        FULL_HEIGHT = TILEMAP.full_height
 
-            for x, char in enumerate(row):
-                x *= TILE_W
-                if LAYOUT_KEY["player"] == char:
-                    self.player.pos = [x,y]
-                    char = " "
-                elif LAYOUT_KEY["zombie"] == char:
-                    Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)),(x,y),(37,43)).add(self.enemies, self.all_sprites)
-                    char = " "
-                sprite_pos = LAYOUT_KEY[char]
-                sprite_class = Entity
-                if char in LAYOUT_KEY["special"]:
-                    sprite_class = LAYOUT_KEY["special"][char]
-                if type(sprite_pos) is list:
-                    sprite_pos = random.choice(sprite_pos)
-                rotation = 0
-                if len(sprite_pos) > 2:
-                    rotation = sprite_pos[2]
-                    sprite_pos = [sprite_pos[0], sprite_pos[1]]
-                entity = sprite_class(pg.transform.rotate(self.spritesheets["tilesheet"].get_sprite(sprite_pos),rotation), (x, y), (TILE_W,TILE_H))
-                entity.add(self.all_sprites, self.layout)
-                if type(entity) is Wall:
-                    entity.add(self.walls)
+        for x in range(TILEMAP.width):
+            x *= TILE_W
+            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (x, -TILE_H), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (x,FULL_HEIGHT), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+        for y in range(TILEMAP.height):
+            y *= TILE_H
+            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (-TILE_W, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (FULL_WIDTH, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+
+        for tile in TILEMAP.tiles():
+            if(type(tile) is tuple):
+                self.player.pos = tile
+                continue
+            tile.add(self.all_sprites, self.layout)
+            if type(tile) is Wall:
+                tile.add(self.walls)
+        return
     
     def spawn_zombie(self):
-        full_w = TILE_W*len(LAYOUT[0])
-        full_h = TILE_H*len(LAYOUT)
         # This should make it stabilize at around 5 Zombies
         # and ensures there is always at least 1 Zombie
         for _ in range(4):
             if random.random() <= 1/(len(self.enemies)+1):
-                pos = [random.randint(0,full_w), random.randint(0,full_h)]
+                pos = [random.randint(0,TILEMAP.full_width), random.randint(0,TILEMAP.full_height)]
                 while not self.camera.is_off_screen(pos):
-                    pos = [random.randint(0,full_w), random.randint(0,full_h)]
-                zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37,43))
+                    pos = [random.randint(0,TILEMAP.full_width), random.randint(0,TILEMAP.full_height)]
+                zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37*CHARACTER_SCALE,43*CHARACTER_SCALE))
                 zombie.add(self.enemies, self.all_sprites)
                 self.all_sprites.change_layer(zombie, 1)
                 zombie.update(self)
@@ -109,9 +97,9 @@ class Game:
         self.particles.empty()
         self.walls.empty()
         self.layout.empty()
-        self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2])
+        self.player = Player(self.spritesheets["characters"].get_sprite((0,1)), [WIDTH/2, HEIGHT/2], [54*CHARACTER_SCALE, 44*CHARACTER_SCALE])
         self.player.add(self.all_sprites)
-        self.load_layout(LAYOUT)
+        self.load_layout()
         for ent in self.enemies.sprites():
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)

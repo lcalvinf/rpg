@@ -26,14 +26,17 @@ class SpriteSheet:
 
 import math
 class Entity(pg.sprite.Sprite):
-    def __init__(self, sprite:pg.Surface, pos: tuple[float,float], size: pg.Rect|None=None):
+    def __init__(self, sprite:pg.Surface, pos: tuple[float,float], size: tuple[int,int]|None=None):
         super().__init__()
         if size is None:
             self.size = sprite.get_size()
             self.sprite = sprite
         else:
             self.size = size
-            self.sprite = pg.transform.scale(sprite, self.size)
+            if sprite.get_size()[0] != size[0] or sprite.get_size()[1] != size[1]:
+                self.sprite = pg.transform.scale(sprite, self.size)
+            else:
+                self.sprite = sprite
         self.pos = pos
         self.image = self.sprite
         # rect and radius are used by pg.sprite functions to know the size of the sprite
