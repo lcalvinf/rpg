@@ -50,7 +50,7 @@ class Entity(pg.sprite.Sprite):
     def world_rect(self):
         return pg.Rect(*self.pos,*self.size)
     def update(self, game):
-        self.pos = add_vectors(self.pos, self.vel)
+        self.pos = add_vectors(self.pos, scale_vector(self.vel, CHARACTER_SCALE))
         for wall in pg.sprite.spritecollide(self, game.walls, False, lambda a, b: a.world_rect.colliderect(b.world_rect)):
             self.pos = sub_vectors(self.pos,self.vel)
             self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
@@ -92,6 +92,11 @@ class Entity(pg.sprite.Sprite):
 class Wall(Entity):
     def __init__(self, *args):
         super().__init__(*args)
+
+class Goal(Wall):
+    def __init__(self, *args):
+        super().__init__(*args)
+
 
 class Bullet(Entity):
     def __init__(self, vel, *args):
@@ -170,7 +175,12 @@ class Zombie(Entity):
 class Player(Entity):
     def __init__(self, *args):
         super().__init__(*args)
+        self.game = None
+    def on_bounce(self, wall):
+        if type(wall) is Goal:
+            self.game.next_level()
     def update(self, game):
+        self.game = game
         keys = pg.key.get_pressed()
         if keys[pg.K_UP]:
             self.vel[1] = -SPEED

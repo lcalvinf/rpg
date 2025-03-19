@@ -23,7 +23,12 @@ class Layout:
             layer = self.tilemap.layers[layer_idx]
             if layer.name == "player":
                 for x, y, image in layer.tiles():
-                    tiles.append((x*TILE_W, y*TILE_H))
+                    tiles.append(("player", x*TILE_W, y*TILE_H, image))
+                    break
+                continue
+            if layer.name == "goal":
+                for x, y, image in layer.tiles():
+                    tiles.append(("goal", x*TILE_W, y*TILE_H, image))
                     break
                 continue
 

@@ -4,7 +4,7 @@ import math
 
 from settings import *
 from utils import *
-from sprites import SpriteSheet, Entity, Player, Zombie, Wall, TextParticle
+from sprites import SpriteSheet, Goal, Player, Zombie, Wall, TextParticle
 from Camera import Camera
 
 class Game:
@@ -24,6 +24,7 @@ class Game:
         # self.running indicates if the game is running at all
         # setting it to False will close the game entirely
         self.running = True
+        self.level = 0
 
         self.spritesheets: dict[str, SpriteSheet] = {}
         self.load_spritesheet("characters", (54, 44))
@@ -62,12 +63,24 @@ class Game:
 
         for tile in TILEMAP.tiles():
             if(type(tile) is tuple):
-                self.player.pos = tile
+                tile_type, x, y, image = tile
+                if tile_type == "player":
+                    self.player.pos = (x, y)
+                elif tile_type == "goal":
+                    Goal(image, (x, y)).add(self.all_sprites, self.layout, self.walls)
                 continue
             tile.add(self.all_sprites, self.layout)
             if type(tile) is Wall:
                 tile.add(self.walls)
         return
+    
+    def next_level(self):
+        global TILEMAP
+        if self.level >= len(LEVELS)-1:
+            return
+        self.level += 1
+        TILEMAP = LEVELS[self.level]
+        self.new()
     
     def spawn_zombie(self):
         # This should make it stabilize at around 5 Zombies
@@ -106,7 +119,6 @@ class Game:
         self.spawn_zombie()
         self.score = 0
         self.camera = Camera(WIDTH,HEIGHT)
-        self.run()
 
     def handle_events(self):
         global WIDTH, HEIGHT
@@ -167,6 +179,7 @@ class Game:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     self.playing = False
+                    self.level = 0
             
             self.screen.fill(COLORS["background"])
             self.screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
