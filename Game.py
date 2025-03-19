@@ -63,11 +63,11 @@ class Game:
 
         for tile in TILEMAP.tiles():
             if(type(tile) is tuple):
-                tile_type, x, y, image = tile
+                tile_type, x, y = tile
                 if tile_type == "player":
                     self.player.pos = (x, y)
                 elif tile_type == "goal":
-                    Goal(image, (x, y)).add(self.all_sprites, self.layout, self.walls)
+                    Goal(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Goal"]), (x, y)).add(self.all_sprites, self.layout, self.walls)
                 continue
             tile.add(self.all_sprites, self.layout)
             if type(tile) is Wall:
@@ -83,9 +83,9 @@ class Game:
         self.new()
     
     def spawn_zombie(self):
-        # This should make it stabilize at around 5 Zombies
+        # This should make it stabilize at around 9 Zombies
         # and ensures there is always at least 1 Zombie
-        for _ in range(4):
+        for _ in range(8):
             if random.random() <= 1/(len(self.enemies)+1):
                 pos = [random.randint(0,TILEMAP.full_width), random.randint(0,TILEMAP.full_height)]
                 while not self.camera.is_off_screen(pos):

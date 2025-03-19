@@ -54,5 +54,6 @@ for i in range(2):
 TILEMAP = LEVELS[0]
 
 TILEMAP_LOCATIONS = {
-    "Wall": (1, 9)
+    "Wall": (1, 9),
+    "Goal": (9, 9)
 }

@@ -18,25 +18,21 @@ class Layout:
         self.full_height = self.height*TILE_H
     def tiles(self):
         tiles = []
-        visible_layers = list(self.tilemap.visible_tile_layers)
-        for layer_idx in visible_layers:
-            layer = self.tilemap.layers[layer_idx]
-            if layer.name == "player":
-                for x, y, image in layer.tiles():
-                    tiles.append(("player", x*TILE_W, y*TILE_H, image))
-                    break
+        visible_layers = list(self.tilemap.visible_layers)
+        for i, layer in enumerate(visible_layers):
+            if isinstance(layer, pytmx.pytmx.TiledObjectGroup):
+                for object in layer:
+                    tiles.append((object.name, object.x, object.y))
                 continue
-            if layer.name == "goal":
-                for x, y, image in layer.tiles():
-                    tiles.append(("goal", x*TILE_W, y*TILE_H, image))
-                    break
+
+            if not isinstance(layer, pytmx.TiledTileLayer):
                 continue
 
             entity = Wall if layer.properties["solid"] else Entity
             for x, y, image in layer.tiles():
                 tile = entity(image, [x*TILE_W, y*TILE_H], [TILE_W,TILE_H])
                 # make the top (i.e. last) layer appear on top of everything, including the player
-                if layer_idx == len(visible_layers)-1:
+                if i == len(visible_layers)-1:
                     tile.layer = 4
                 tiles.append(tile)
         return tiles
