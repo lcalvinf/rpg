@@ -165,6 +165,8 @@ class Game:
     def draw_HUD(self):
         screen = self.screen
         screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
+        if DEBUG:
+            screen.blit(*draw_centered_text(self.smallfont, str(round(self.clock.get_fps(), 2)), GRAY, (100, HEIGHT-40)))
     
     # Show the start screen
     def start(self):

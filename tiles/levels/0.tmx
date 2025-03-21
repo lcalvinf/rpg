@@ -349,16 +349,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="11" name="markers">
-  <object id="1" name="goal" x="1045.43" y="775.954">
-   <point/>
-  </object>
-  <object id="2" name="player" x="279.214" y="387.977">
-   <point/>
-  </object>
- </objectgroup>
  <layer id="6" name="forest" width="80" height="80">
   <properties>
+   <property name="cover" type="bool" value="true"/>
    <property name="solid" type="bool" value="false"/>
   </properties>
   <data encoding="csv">
@@ -444,4 +437,12 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="11" name="markers">
+  <object id="1" name="goal" x="1045.43" y="775.954">
+   <point/>
+  </object>
+  <object id="2" name="player" x="279.214" y="387.977">
+   <point/>
+  </object>
+ </objectgroup>
 </map>

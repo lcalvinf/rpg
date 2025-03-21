@@ -31,8 +31,7 @@ class Layout:
             entity = Wall if layer.properties["solid"] else Entity
             for x, y, image in layer.tiles():
                 tile = entity(image, [x*TILE_W, y*TILE_H], [TILE_W,TILE_H])
-                # make the top (i.e. last) layer appear on top of everything, including the player
-                if i == len(visible_layers)-1:
+                if "cover" in layer.properties and layer.properties["cover"]:
                     tile.layer = 4
                 tiles.append(tile)
         return tiles
