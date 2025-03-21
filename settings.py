@@ -49,7 +49,7 @@ CAMERA_FOLLOW_RATE_STOPPED = 0.2
 
 from Layout import Layout
 LEVELS = []
-for i in range(2):
+for i in range(3):
     LEVELS.append(Layout(f"tiles/levels/{i}.tmx"))
 TILEMAP = LEVELS[0]
 
