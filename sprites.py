@@ -165,17 +165,40 @@ class TextParticle(Entity):
 class Zombie(Entity):
     def __init__(self, *args):
         super().__init__(*args)
+        self.follow_mode = True
+        self.target = None
+        self.mode_timer = ZOMBIE_MODE_TIME+random.randint(-1000, 1000)
         self.game = None
     def update(self, game):
-        self.vel = scale_vector(normalize_vector(sub_vectors(game.player.pos, self.pos)), ZOMBIE_SPEED)
+        if self.target is None:
+            self.target = [*game.player.pos]
+
+        if self.follow_mode and not game.camera.is_off_screen(self.pos):
+            self.target = [*game.player.pos]
+        randomize = 10 if self.follow_mode else self.mode_timer*100/ZOMBIE_MODE_TIME
+        self.target = add_vectors(self.target, [random.random()*randomize-randomize/2, random.random()*randomize-randomize/2])
+        self.vel = scale_vector(normalize_vector(sub_vectors(self.target, self.pos)), ZOMBIE_SPEED)
+
         if pg.sprite.collide_circle(self, game.player):
             game.playing = False
         self.game = game
+
+        self.mode_timer -= game.clock.get_time()
+        if self.mode_timer <= 0:
+            self.mode_timer = ZOMBIE_MODE_TIME
+            self.follow_mode = not self.follow_mode
+
         super().update(game)
     def kill(self):
         super().kill()
         if self.game:
             self.game.spawn_zombie()
+    def on_bounce(self, _):
+        if not self.follow_mode or self.target is None:
+            return
+        self.follow_mode = False
+        self.mode_timer = 500
+        self.target = add_vectors(self.pos, scale_vector(self.vel, 100/ZOMBIE_SPEED))
 
 class Player(Entity):
     def __init__(self, *args):

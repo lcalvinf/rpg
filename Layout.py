@@ -1,7 +1,7 @@
 import pytmx
 
 from settings import *
-from sprites import Entity, Wall, Player
+from sprites import Entity, Wall 
 
 class Layout:
     def __init__(self, filepath):
@@ -10,7 +10,6 @@ class Layout:
         dir = Path(sys.argv[0]).parent
         self.filepath = Path.joinpath(dir, filepath)
     def load(self):
-        global FULL_WIDTH, FULL_HEIGHT
         self.tilemap = pytmx.util_pygame.load_pygame(self.filepath)
         self.width = self.tilemap.width
         self.height = self.tilemap.height

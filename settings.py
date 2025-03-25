@@ -42,14 +42,15 @@ BULLET_SPEED = 12
 BULLET_BOUNCES = 3
 
 ZOMBIE_SPEED = 2
+ZOMBIE_MODE_TIME = 10000
 
 CAMERA_LOCK_DIST = 70
 CAMERA_FOLLOW_RATE = 0.07
 CAMERA_FOLLOW_RATE_STOPPED = 0.2
 
 
-from Layout import Layout
 LEVELS = []
+from Layout import Layout
 for i in range(3):
     LEVELS.append(Layout(f"tiles/levels/{i}.tmx"))
 TILEMAP = LEVELS[0]
