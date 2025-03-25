@@ -88,6 +88,8 @@ class Entity(pg.sprite.Sprite):
             pg.draw.rect(self.image, GREEN, pg.Rect(0,0,*self.image.get_size()), 1)
         self.rect = pos
         self.rect = game.camera.get_view(self)
+    def debug_render(self, screen, game):
+        pass
 
 class Wall(Entity):
     def __init__(self, *args):
@@ -199,6 +201,9 @@ class Zombie(Entity):
         self.follow_mode = False
         self.mode_timer = 500
         self.target = add_vectors(self.pos, scale_vector(self.vel, 100/ZOMBIE_SPEED))
+    def debug_render(self, screen, game):
+        pg.draw.circle(screen, RED, self.target, 2)
+        pg.draw.line(screen, RED, self.pos, self.target, 2)
 
 class Player(Entity):
     def __init__(self, *args):
