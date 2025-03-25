@@ -124,11 +124,16 @@ class Bullet(Entity):
             self.target_dir = math.atan2(-self.vel[1], self.vel[0])
             self.dir = self.target_dir
             self.old_vel = self.vel
+
+            if self.bounces+self.kills > BULLET_BOUNCES:
+                self.kill()
         if game.camera.is_rect_off_screen(self.world_rect):
             self.kill()
         super().update(game)
     def on_bounce(self, _):
         self.bounces += 1
+        if self.bounces+self.kills > BULLET_BOUNCES:
+            self.kill()
 
 import random
 class TextParticle(Entity):
