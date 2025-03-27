@@ -22,6 +22,8 @@ class Layout:
     def tiles(self):
         tiles = []
         visible_layers = list(self.tilemap.visible_layers)
+        background = pg.Surface((self.full_width, self.full_height))
+        tiles.append(Entity(background, [0,0]))
         for i, layer in enumerate(visible_layers):
             if isinstance(layer, pytmx.pytmx.TiledObjectGroup):
                 for object in layer:
@@ -36,5 +38,8 @@ class Layout:
                 tile = entity(image, [x*TILE_W, y*TILE_H], [TILE_W,TILE_H])
                 if "cover" in layer.properties and layer.properties["cover"]:
                     tile.layer = 4
+                elif not layer.properties["solid"]:
+                    background.blit(tile.image, tile.pos)
+                    continue
                 tiles.append(tile)
         return tiles
