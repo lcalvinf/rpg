@@ -88,12 +88,17 @@ class Game:
         for _ in range(8):
             if random.random() <= 1/(len(self.enemies)+1):
                 pos = [random.randint(0,TILEMAP.full_width), random.randint(0,TILEMAP.full_height)]
-                while not self.camera.is_off_screen(pos):
+                while not self.camera.is_off_screen(pos) or self.is_in_wall(pos):
                     pos = [random.randint(0,TILEMAP.full_width), random.randint(0,TILEMAP.full_height)]
                 zombie = Zombie(self.spritesheets["characters"].get_image(pg.Rect(424,0,37,43)), pos, (37*CHARACTER_SCALE,43*CHARACTER_SCALE))
                 zombie.add(self.enemies, self.all_sprites)
                 self.all_sprites.change_layer(zombie, 1)
                 zombie.update(self)
+    def is_in_wall(self, pos):
+        for wall in self.walls:
+            if wall.world_rect.collidepoint(*pos):
+                return True
+        return False
 
     def spawn_text_particle(self, text, pos=None):
         if pos is None:

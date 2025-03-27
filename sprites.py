@@ -176,7 +176,7 @@ class Zombie(Entity):
             self.target = [*game.player.pos]
 
         if self.follow_mode and not game.camera.is_off_screen(self.pos):
-            self.target = [*game.player.pos]
+            self.target = add_vectors(self.target, scale_vector(normalize_vector(sub_vectors(game.player.pos, self.target)), 2))
         randomize = 10 if self.follow_mode else self.mode_timer*100/ZOMBIE_MODE_TIME
         self.target = add_vectors(self.target, [random.random()*randomize-randomize/2, random.random()*randomize-randomize/2])
         self.vel = scale_vector(normalize_vector(sub_vectors(self.target, self.pos)), ZOMBIE_SPEED)
