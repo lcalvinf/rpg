@@ -9,7 +9,11 @@ class Layout:
         from pathlib import Path
         dir = Path(sys.argv[0]).parent
         self.filepath = Path.joinpath(dir, filepath)
+        self.loaded = False
     def load(self):
+        if self.loaded:
+            return
+        self.loaded = True
         self.tilemap = pytmx.util_pygame.load_pygame(self.filepath)
         self.width = self.tilemap.width
         self.height = self.tilemap.height

@@ -75,11 +75,9 @@ class Game:
         return
     
     def next_level(self):
-        global TILEMAP
         if self.level >= len(LEVELS)-1:
             return
         self.level += 1
-        TILEMAP = LEVELS[self.level]
         self.new()
     
     def spawn_zombie(self):
@@ -110,6 +108,8 @@ class Game:
     
     # Start a new game
     def new(self):
+        global TILEMAP
+        TILEMAP = LEVELS[self.level]
         self.all_sprites.empty()
         self.enemies.empty()
         self.particles.empty()
@@ -122,7 +122,6 @@ class Game:
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)
         self.spawn_zombie()
-        self.score = 0
         self.camera = Camera(WIDTH,HEIGHT)
 
     def handle_events(self):
@@ -189,6 +188,7 @@ class Game:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     self.playing = False
+                    self.score = 0
                     self.level = 0
             
             self.screen.fill(COLORS["background"])
