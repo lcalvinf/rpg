@@ -61,7 +61,7 @@ class Game:
             Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (-TILE_W, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
             Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (FULL_WIDTH, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
 
-        for tile in TILEMAP.tiles():
+        for tile in TILEMAP.tiles(self.screen.get_flags()):
             if(type(tile) is tuple):
                 tile_type, x, y = tile
                 if tile_type == "player":
