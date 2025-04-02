@@ -122,8 +122,9 @@ class Game:
         for ent in self.enemies.sprites():
             self.all_sprites.change_layer(ent, 1)
         self.all_sprites.change_layer(self.player, 2)
-        self.spawn_zombie()
         self.camera = Camera(WIDTH,HEIGHT)
+        self.camera.set_pos(self.player.pos)
+        self.spawn_zombie()
 
     def handle_events(self):
         global WIDTH, HEIGHT
