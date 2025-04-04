@@ -49,13 +49,28 @@ class Entity(pg.sprite.Sprite):
     @property
     def world_rect(self):
         return pg.Rect(*self.pos,*self.size)
+    def collide(self, wall):
+        wall: Entity = wall
+        clip = self.world_rect.clip(wall.world_rect)
+        self.pos = sub_vectors(self.pos,scale_vector(self.vel, CHARACTER_SCALE))
+        if clip.height == self.world_rect.height:
+            self.vel[0] *= -1
+        elif clip.width == self.world_rect.width:
+            self.vel[1] *= -1
+        elif clip.width > clip.height:
+            self.vel[1] *= -1
+        elif clip.height > clip.width:
+            self.vel[0] *= -1
+        else:
+            self.vel[0] *= -1
+            self.vel[1] *= -1
+
+        self.pos = add_vectors(self.pos, self.vel)
+        self.on_bounce(wall)
     def update(self, game):
         self.pos = add_vectors(self.pos, scale_vector(self.vel, CHARACTER_SCALE))
         for wall in pg.sprite.spritecollide(self, game.walls, False, lambda a, b: a.world_rect.colliderect(b.world_rect)):
-            self.pos = sub_vectors(self.pos,scale_vector(self.vel, CHARACTER_SCALE))
-            self.vel = set_mag((sub_vectors(wall.pos,self.pos)),-2)
-            self.pos = add_vectors(self.pos, self.vel)
-            self.on_bounce(wall)
+            self.collide(wall)
             break
         # we change self.rect to render the sprite properly, so we have to reset it here
         self.rect = self.world_rect 

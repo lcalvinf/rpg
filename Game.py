@@ -52,14 +52,10 @@ class Game:
         FULL_WIDTH = TILEMAP.full_width
         FULL_HEIGHT = TILEMAP.full_height
 
-        for x in range(TILEMAP.width):
-            x *= TILE_W
-            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (x, -TILE_H), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (x,FULL_HEIGHT), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-        for y in range(TILEMAP.height):
-            y *= TILE_H
-            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (-TILE_W, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
-            Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (FULL_WIDTH, y), (TILE_W,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+        Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (0,-TILE_H), (FULL_WIDTH,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+        Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (-TILE_W,0), (TILE_W, FULL_HEIGHT)).add(self.all_sprites,self.layout,self.walls)
+        Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (0,FULL_HEIGHT), (FULL_WIDTH,TILE_H)).add(self.all_sprites,self.layout,self.walls)
+        Wall(self.spritesheets["tilesheet"].get_sprite(TILEMAP_LOCATIONS["Wall"]), (FULL_WIDTH,0), (TILE_W, FULL_HEIGHT)).add(self.all_sprites,self.layout,self.walls)
 
         for tile in TILEMAP.tiles(self.screen.get_flags()):
             if(type(tile) is tuple):
