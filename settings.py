@@ -25,6 +25,9 @@ CALLOUTS = {
         "Combo!",
         "Double kill!",
         "Multishot!"
+    ],
+    "health": [
+        "+1 HP!"
     ]
 }
 
@@ -40,6 +43,8 @@ FPS = 60
 SPEED = 8
 BULLET_SPEED = 12
 BULLET_BOUNCES = 3
+
+MAX_HEALTH = 4
 
 ZOMBIE_SPEED = 2
 ZOMBIE_MODE_TIME = 10000

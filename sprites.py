@@ -135,6 +135,9 @@ class Bullet(Entity):
 
             if self.kills > 1:
                 game.spawn_text_particle(random.choice(CALLOUTS["combo"]), self.pos)
+            
+            for i in range(random.randint(1,3)):
+                game.spawn_health_particle(add_vectors(self.pos, (random.random()*30-15, random.random()*30-15)))
 
             game.score += score
             self.vel = rotate_vector(self.vel, random.random()*math.pi/4-math.pi/2)
@@ -179,6 +182,37 @@ class TextParticle(Entity):
         alpha = 1-abs(life-0.5)*2
         self.image.set_alpha(alpha*255)
 
+class HealthParticle(Entity):
+    def __init__(self, game, pos):
+        sprite = game.spritesheets["tilesheet"].get_sprite((9,7))
+        super().__init__(sprite, pos, sprite.get_size())
+        self.lifetime = random.random()*10000+5000
+        self.initial_lifetime = self.lifetime
+    def update(self, game):
+        self.lifetime -= game.clock.get_time()
+        if self.lifetime < 0:
+            self.kill()
+
+        if pg.sprite.collide_circle(self, game.player):
+            if game.player.health < MAX_HEALTH:
+                game.player.health += 1
+                game.spawn_text_particle(random.choice(CALLOUTS["health"]), self.pos)
+            else:
+                game.score += 1
+                game.spawn_text_particle("+1", self.pos)
+            self.kill()
+        
+        super().update(game)
+
+        life = self.lifetime/self.initial_lifetime
+        if life > 0.99:
+            scale = (1-life)/0.01
+            self.rect = self.rect.scale_by(scale)
+            self.image = pg.transform.scale_by(self.image, scale)
+        elif life < 0.25:
+            alpha = life*4
+            self.image.set_alpha(alpha*255)
+
 class Zombie(Entity):
     def __init__(self, *args):
         super().__init__(*args)
@@ -197,7 +231,7 @@ class Zombie(Entity):
         self.vel = scale_vector(normalize_vector(sub_vectors(self.target, self.pos)), ZOMBIE_SPEED)
 
         if pg.sprite.collide_circle(self, game.player):
-            game.playing = False
+            game.player.hit(game)
         self.game = game
 
         self.mode_timer -= game.clock.get_time()
@@ -224,11 +258,17 @@ class Player(Entity):
     def __init__(self, *args):
         super().__init__(*args)
         self.game = None
+        self.health = MAX_HEALTH
+        self.safe = False
+        self.hit_this_frame = False
     def on_bounce(self, wall):
         if type(wall) is Goal:
             self.game.next_level()
     def update(self, game):
         self.game = game
+        self.safe = self.safe and self.hit_this_frame
+        self.hit_this_frame = False
+
         keys = pg.key.get_pressed()
         if keys[pg.K_UP]:
             self.vel[1] = -SPEED
@@ -250,3 +290,12 @@ class Player(Entity):
         bullet.target_dir = self.dir
         bullet.add(game.particles, game.all_sprites)
         game.all_sprites.change_layer(bullet, 1)
+    def hit(self, game):
+        self.hit_this_frame = True
+        if self.safe:
+            return
+        self.safe = True
+        self.health -= 1
+        if self.health < 1:
+            game.playing = False
+            return

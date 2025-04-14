@@ -4,7 +4,7 @@ import math
 
 from settings import *
 from utils import *
-from sprites import SpriteSheet, Goal, Player, Zombie, Wall, TextParticle
+from sprites import SpriteSheet, Goal, Player, Zombie, Wall, TextParticle, HealthParticle
 from Camera import Camera
 
 class Game:
@@ -103,6 +103,11 @@ class Game:
         self.all_sprites.change_layer(particle,3)
         particle.update(self)
     
+    def spawn_health_particle(self, pos):
+        particle = HealthParticle(self, pos)
+        particle.add(self.particles, self.all_sprites)
+        particle.update(self)
+    
     # Start a new game
     def new(self):
         global TILEMAP
@@ -170,6 +175,11 @@ class Game:
     def draw_HUD(self):
         screen = self.screen
         screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
+
+        R = 10
+        for i in range(self.player.health):
+            pg.draw.circle(screen, RED, (10+R+(i*(R*2+10)), 10+R), R)
+
         if DEBUG:
             screen.blit(*draw_centered_text(self.smallfont, str(round(self.clock.get_fps(), 2)), GRAY, (100, HEIGHT-40)))
     
