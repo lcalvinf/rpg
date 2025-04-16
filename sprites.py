@@ -211,8 +211,7 @@ class Particle(Entity):
         pass
 class AmmoParticle(Particle):
     def __init__(self, game, pos):
-        sprite = game.spritesheets["tilesheet"].get_sprite((11,9))
-        sprite = pg.transform.rotate(sprite, random.random()*360)
+        sprite = pg.transform.rotate(game.ammo_sprite, random.random()*360)
         super().__init__(sprite, pos, 5000, 15000)
     def collide_player(self, game):
         if game.player.ammo < MAX_AMMO:

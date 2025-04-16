@@ -29,6 +29,10 @@ class Game:
         self.spritesheets: dict[str, SpriteSheet] = {}
         self.load_spritesheet("characters", (54, 44))
         self.load_spritesheet("tilesheet", (16, 16), (1,1))
+        self.load_spritesheet("tilesheet_2", (16,16))
+        self.ammo_sprite = self.spritesheets["tilesheet"].get_sprite((11,9))
+        heart_sprite = self.spritesheets["tilesheet_2"].get_sprite((15,10))
+        self.heart_sprite = pg.transform.scale_by(heart_sprite, 2)
 
         self.layout = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -175,11 +179,12 @@ class Game:
         screen = self.screen
         screen.blit(*draw_centered_text(self.font, str(self.score), BLACK, (WIDTH/2, 30)))
 
-        R = 10
+        h_r = self.heart_sprite.get_width()/2
         for i in range(self.player.health):
-            pg.draw.circle(screen, RED, (10+R+(i*(R*2+10)), 10+R), R)
+            screen.blit(self.heart_sprite, (10+h_r+(i*(h_r*2+10)), 5+h_r))
+        a_r = self.ammo_sprite.get_width()/2
         for i in range(self.player.ammo):
-            pg.draw.circle(screen, BLACK, (10+R+(i*(R*2+10)), 30+2*R), R)
+            screen.blit(self.ammo_sprite, (10+h_r+(i*(a_r*2+10)), 20+2*h_r))
 
         if DEBUG:
             screen.blit(*draw_centered_text(self.smallfont, str(round(self.clock.get_fps(), 2)), GRAY, (100, HEIGHT-40)))
