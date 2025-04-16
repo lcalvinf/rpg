@@ -137,7 +137,8 @@ class Bullet(Entity):
                 game.spawn_text_particle(random.choice(CALLOUTS["combo"]), self.pos)
             
             for i in range(random.randint(1,3)):
-                game.spawn_health_particle(add_vectors(self.pos, (random.random()*30-15, random.random()*30-15)))
+                particle_type = HealthParticle if random.random() < 0.75 else AmmoParticle
+                game.spawn_particle(particle_type(game, add_vectors(self.pos, (random.random()*30-15, random.random()*30-15))))
 
             game.score += score
             self.vel = rotate_vector(self.vel, random.random()*math.pi/4-math.pi/2)
@@ -182,11 +183,10 @@ class TextParticle(Entity):
         alpha = 1-abs(life-0.5)*2
         self.image.set_alpha(alpha*255)
 
-class HealthParticle(Entity):
-    def __init__(self, game, pos):
-        sprite = game.spritesheets["tilesheet"].get_sprite((9,7))
+class Particle(Entity):
+    def __init__(self, sprite, pos, lifetime_min, lifetime_max):
         super().__init__(sprite, pos, sprite.get_size())
-        self.lifetime = random.random()*10000+5000
+        self.lifetime = random.random()*(lifetime_max-lifetime_min)+lifetime_min
         self.initial_lifetime = self.lifetime
     def update(self, game):
         self.lifetime -= game.clock.get_time()
@@ -194,12 +194,7 @@ class HealthParticle(Entity):
             self.kill()
 
         if pg.sprite.collide_circle(self, game.player):
-            if game.player.health < MAX_HEALTH:
-                game.player.health += 1
-                game.spawn_text_particle(random.choice(CALLOUTS["health"]), self.pos)
-            else:
-                game.score += 1
-                game.spawn_text_particle("+1", self.pos)
+            self.collide_player(game)
             self.kill()
         
         super().update(game)
@@ -212,6 +207,29 @@ class HealthParticle(Entity):
         elif life < 0.25:
             alpha = life*4
             self.image.set_alpha(alpha*255)
+    def collide_player(self, game):
+        pass
+class AmmoParticle(Particle):
+    def __init__(self, game, pos):
+        sprite = game.spritesheets["tilesheet"].get_sprite((11,9))
+        sprite = pg.transform.rotate(sprite, random.random()*360)
+        super().__init__(sprite, pos, 5000, 15000)
+    def collide_player(self, game):
+        if game.player.ammo < MAX_AMMO:
+            game.player.ammo += 1
+            game.spawn_text_particle(random.choice(CALLOUTS["ammo"]), self.pos)
+
+class HealthParticle(Particle):
+    def __init__(self, game, pos):
+        sprite = game.spritesheets["tilesheet"].get_sprite((9,7))
+        super().__init__(sprite, pos, 5000, 1500)
+    def collide_player(self, game):
+        if game.player.health < MAX_HEALTH:
+            game.player.health += 1
+            game.spawn_text_particle(random.choice(CALLOUTS["health"]), self.pos)
+        else:
+            game.score += 1
+            game.spawn_text_particle("+1", self.pos)
 
 class Zombie(Entity):
     def __init__(self, *args):
@@ -259,6 +277,7 @@ class Player(Entity):
         super().__init__(*args)
         self.game = None
         self.health = MAX_HEALTH
+        self.ammo = MAX_AMMO
         self.safe = False
         self.hit_this_frame = False
     def on_bounce(self, wall):
@@ -285,6 +304,10 @@ class Player(Entity):
         
         super().update(game)
     def fire_bullet(self, game):
+        if self.ammo <= 0:
+            game.spawn_text_particle("Out of Ammo!", self.pos)
+            return
+        self.ammo -= 1
         bullet = Bullet(rotate_vector([BULLET_SPEED,0], self.dir), pg.transform.rotate(game.spritesheets["tilesheet"].get_sprite([11,9]), -45), list(self.pos))
         bullet.dir = self.dir
         bullet.target_dir = self.dir

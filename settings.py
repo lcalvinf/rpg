@@ -28,7 +28,10 @@ CALLOUTS = {
     ],
     "health": [
         "+1 HP!"
-    ]
+    ],
+    "ammo": [
+        "+1 Ammo!"
+    ],
 }
 
 WIDTH = 800
@@ -45,6 +48,7 @@ BULLET_SPEED = 12
 BULLET_BOUNCES = 3
 
 MAX_HEALTH = 4
+MAX_AMMO = 7
 
 ZOMBIE_SPEED = 2
 ZOMBIE_MODE_TIME = 10000

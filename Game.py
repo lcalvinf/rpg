@@ -103,8 +103,7 @@ class Game:
         self.all_sprites.change_layer(particle,3)
         particle.update(self)
     
-    def spawn_health_particle(self, pos):
-        particle = HealthParticle(self, pos)
+    def spawn_particle(self, particle):
         particle.add(self.particles, self.all_sprites)
         particle.update(self)
     
@@ -179,6 +178,8 @@ class Game:
         R = 10
         for i in range(self.player.health):
             pg.draw.circle(screen, RED, (10+R+(i*(R*2+10)), 10+R), R)
+        for i in range(self.player.ammo):
+            pg.draw.circle(screen, BLACK, (10+R+(i*(R*2+10)), 30+2*R), R)
 
         if DEBUG:
             screen.blit(*draw_centered_text(self.smallfont, str(round(self.clock.get_fps(), 2)), GRAY, (100, HEIGHT-40)))
