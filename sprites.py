@@ -136,8 +136,9 @@ class Bullet(Entity):
             if self.kills > 1:
                 game.spawn_text_particle(random.choice(CALLOUTS["combo"]), self.pos)
             
+            ammo_odds = (1-(game.player.ammo+1)/MAX_AMMO)**2
             for i in range(random.randint(1,3)):
-                particle_type = HealthParticle if random.random() < 0.75 else AmmoParticle
+                particle_type = AmmoParticle if random.random() < ammo_odds else HealthParticle 
                 game.spawn_particle(particle_type(game, add_vectors(self.pos, (random.random()*30-15, random.random()*30-15))))
 
             game.score += score
