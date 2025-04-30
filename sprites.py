@@ -123,8 +123,10 @@ class Bullet(Entity):
         self.bounces = 0
         self.kills = 0
     def update(self, game):
+        self.game = game
         self.vel = set_mag((self.old_vel),BULLET_SPEED)
         if len(pg.sprite.spritecollide(self, game.enemies, True)) > 0:
+            game.play_sound("kill")
             self.kills += 1
             score = self.kills
             if self.bounces > 0:
@@ -154,6 +156,7 @@ class Bullet(Entity):
         super().update(game)
     def on_bounce(self, _):
         self.bounces += 1
+        self.game.play_sound("collide")
         if self.bounces+self.kills > BULLET_BOUNCES:
             self.kill()
 
@@ -218,6 +221,7 @@ class AmmoParticle(Particle):
         if game.player.ammo < MAX_AMMO:
             game.player.ammo += 1
             game.spawn_text_particle(random.choice(CALLOUTS["ammo"]), self.pos)
+            game.play_sound("pickup")
 
 class HealthParticle(Particle):
     def __init__(self, game, pos):
@@ -230,6 +234,7 @@ class HealthParticle(Particle):
         else:
             game.score += 1
             game.spawn_text_particle("+1", self.pos)
+        game.play_sound("pickup")
 
 class Zombie(Entity):
     def __init__(self, *args):
@@ -283,6 +288,8 @@ class Player(Entity):
     def on_bounce(self, wall):
         if type(wall) is Goal:
             self.game.next_level()
+        else:
+            self.game.play_sound("collide")
     def update(self, game):
         self.game = game
         self.safe = self.safe and self.hit_this_frame
@@ -321,4 +328,6 @@ class Player(Entity):
         self.health -= 1
         if self.health < 1:
             game.playing = False
+            game.play_sound("death")
             return
+        game.play_sound("hit")

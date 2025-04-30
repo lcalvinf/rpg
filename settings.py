@@ -16,6 +16,14 @@ COLORS = {
     "background": WHITE
 }
 
+SOUNDS = {
+    "pickup": "pickupCoin.wav",
+    "hit": "hit.wav",
+    "death": "death.wav",
+    "collide": "collide.wav",
+    "kill": "kill.wav"
+}
+
 CALLOUTS = {
     "bank": [
         "Bank Shot!",

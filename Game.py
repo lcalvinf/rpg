@@ -34,6 +34,8 @@ class Game:
         heart_sprite = self.spritesheets["tilesheet_2"].get_sprite((15,10))
         self.heart_sprite = pg.transform.scale_by(heart_sprite, 2)
 
+        self.load_sounds()
+
         self.layout = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
@@ -43,6 +45,15 @@ class Game:
         self.score = 0
 
         self.camera = Camera(WIDTH,HEIGHT)
+    
+    def load_sounds(self):
+        import sys
+        from pathlib import Path
+        dir = Path(sys.argv[0]).parent
+        for sound in SOUNDS:
+            SOUNDS[sound] = pg.mixer.Sound(Path(dir, f"sounds/{SOUNDS[sound]}"))
+    def play_sound(self, sound_name):
+        SOUNDS[sound_name].play()
     
     def load_spritesheet(self, name:str, *args):
         import sys
