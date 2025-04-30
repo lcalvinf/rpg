@@ -88,6 +88,7 @@ class Game:
     def next_level(self):
         if self.level >= len(LEVELS)-1:
             return
+        self.play_sound("level")
         self.level += 1
         self.new()
     

@@ -21,7 +21,8 @@ SOUNDS = {
     "hit": "hit.wav",
     "death": "death.wav",
     "collide": "collide.wav",
-    "kill": "kill.wav"
+    "kill": "kill.wav",
+    "level": "levelUp.wav"
 }
 
 CALLOUTS = {
